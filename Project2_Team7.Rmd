@@ -137,39 +137,38 @@ Because the daily death count is more closely related to earlier confirmed cases
 newdata_subset = newdata[-c(1:29, 396:415),]
 ```
 
+We have chosen to follow a one way ANOVA model for this data set.
+
 $Y_{ij} = \mu_i + \epsilon{ij}$ 
+
+$Y_{ij}$ represents the outcome of the $j^{th}$ value of Y for the $i^{th}$ group.
 
 $\mu_i$ represents the mean percentage of number trips outside of the home per day.
 
-$i$ = NEED TO FINISH
+$i$  represents the three levels for the different intervals of trips taken.
 
-$j$ = NEED TO FINISH
+$j$ represents the value of trips taken on a specific day in a specific  interval of trips taken. 
 
-We are interested in whether or not there is statistical evidence the means among the different trip sizes is equal. If we fail to reject the null hypothesis we will conclude that the amount of trips out of the home during the year did not have a significant impact on the confirmed new cases of Covid-19 or the confirmed deaths resulting from Covid-19.
+We are interested in whether or not there is statistical evidence the means among the different trip size is equal. If we fail to reject the null hypothesis we will conclude that the amount of trips out of the home during the year did not have a significant impact on the confirmed new cases of Covid-19 or the confirmed deaths resulting from Covid-19.
 
 $H_0 : \mu_1 = \mu_2 = \mu_3$ $H_A :$ At least one $\mu_i$ is not equal 
 
-
-The three independent variables that we will use from this data set are `Number_of_Trips_1-3`, `Number_of_Trips_50-100`, `Number_of_Trips_200-500`. The two dependent variables we will use from this data set are `New_cases`, and `New_deaths`. The first three variables report the amount of trips individuals took during February 1, 2020 to January 31, 2021 throughout the United States among the Covid-19 pandemic. The trip numbers are grouped by three different intervals; 1-3 trips, 50-100 trips, and 250-500 trips. The `New_cases` and `New_deaths` variables are the amount of new confirmed cases and confirmed deaths during the same time frame. Each independent variable is plotted below to display the distribution compared to the dependent variables
-
+The three independent variables that we will use from this data set are `Number_of_Trips_1-3`, `Number_of_Trips_50-100`, `Number_of_Trips_250-500`. The two dependent variables we will use from this data set are `New_cases`, and `New_deaths`. The first three variables report the amount of trips individuals took during February 1, 2020 to January 31, 2021 throughout the United States among the Covid-19 pandemic. The trip numbers are grouped by three different intervals; 1-3 trips, 50-100 trips, and 250-500 trips. The `New_cases` and `New_deaths` variables are the amount of new confirmed cases and confirmed deaths during the same time frame. Each independent variable is plotted below to display the distribution compared to the dependent variables
 
 The three main assumptions for the one-way ANOVA model are the following:
 
-* The $Y_{ij}$'s were randomly sampled
+* The $Y_{ij}$'s are required to be randomly sampled 
 
-* The $i$ groups are independent
+* The $i$ groups are independent and randomly selected from the true population
 
-* $\epsilon_{ij}$ ~ (0,$\sigma^{2}_{\epsilon}$) where the errors are independent and normally distributed
-
-# NEED TO DO 4.c.
-
-
+* $\epsilon_{ij}$ ~ (0,$\sigma^{2}_{\epsilon}$) where the errors are independent and should follow a normal distribution.
 
 Model No. 1:
 ```{r echo=F}
 cases.model = aov(New_cases ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3` + `Number_of_Trips_50-100`, data=newdata_subset)
 anova(cases.model)
 ```
+
 
 The F test-statistic for all three variables is larger than zero, meaning there is statistical evidence to suggest the group means are not equal for each quantity of trips taken. 
 
@@ -182,16 +181,70 @@ deaths.model = aov(New_deaths ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3
 anova(deaths.model)
 ```
 
+
 For the trip sizes of 1-3 and 250-500, the F test-statistics are greater than zero, meaning there is statistical evidence to suggest the group means are not equal for each quantity of trips taken. The F test-statistic for the trip size of 50-100 is very close to 0 meaning there is small evidence that the group mean is different among the other two quantities. 
 
-The p-value for the trip size of 50-100 is larger than our p-value, therefore we fail to reject the null and conclude that the true average quantity of trips taken is equal. This suggests that taking 50 to 100 trips from the home did not correlate with the amount of deaths from Covid-19 in the last year. 
+The p-value for the trip size of 50-100 is larger than our significance level of 0.05, therefore we fail to reject the null and conclude that the true average quantity of trips taken is equal. This suggests that taking 50 to 100 trips from the home did not correlate with the amount of deaths from Covid-19 in the last year. 
 
-Along with the significant evidence from the F test-statistic that the trip size of 1-3 and 250-500 does have significant evidence to say the means are different is confirmed by both of the p-values being less than that of our significance level of 0.95. This suggests that taking either 1 to 3 trips or 250 to 500 trips from the home in the last year did have a large effect on the total count of confirmed deaths. 
+Along with the significant evidence from the F test-statistic that the trip size of 1-3 and 250-500 does have significant evidence to say the means are different is confirmed by both of the p-values being less than that of our significance level of 0.05. This suggests that taking either 1 to 3 trips or 250 to 500 trips from the home in the last year did have a large effect on the total count of confirmed deaths. 
+
+To continue to test if our model is the best fitting model, we will calculate the adjusted r-squared value for both models below. The adjusted r-squared value will help tell us which input variable can explain the variation of our output variable. The higher the adjusted r-squared value is, the better fit our model is. We found that our ANOVA output is the exact same for the linear version of our model (shown below), so with this we calculated the adjusted r-squared using the summary function. The value of the adjusted r-squared is quite low for the model with the dependent variable as New_cases, reporting at 0.1594 and for New_deaths, reporting at 0.1282. Seeing we have a low r-squared value for both models, we will continue on and with our tests for the goodness of fit. 
+
+Model No. 1 - ANOVA for linear model and adjusted t-squared analysis:
+```{r echo=F}
+# Make our anova model to a linear model to find adjusted R-squared
+cases.model2 = lm(New_cases ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3` + `Number_of_Trips_50-100`, data=newdata_subset)
+anova(cases.model2)
+
+summary(cases.model2)
+```
+
+Model No. 2 - ANOVA for linear model and adjusted t-squared analysis:
+```{r echo=F}
+# Make our anova model to a linear model to find adjusted R-squared
+death.model2 = lm(New_deaths ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3` + `Number_of_Trips_50-100`, data=newdata_subset)
+
+anova(death.model2)
+
+summary(death.model2)
+```
 
 
 ## Sensitivity Analysis
 
-Conduct model diagnostics
+In this section we will start the sensitivity analysis of our model to test how good of a fit our model was to our data. Below, we have several plots for our first model based on the number of new cases observed. These plots are a Residual vs. Fitted plot, a Normal Q-Q plot, a Scale-Location plot, and finally a Residuals vs. Leverage plot. 
+
+The Residual vs. Fitted plot shows if the residuals have a non-linear pattern or not. The Normal Q-Q plot shows us if the residuals are normally distributed or not. The Scale-Location plot shows us if the residuals are spread evenly across all of the predictor variables we have. Finally, the Residuals vs. Leverage plot gives us insight into which data points are outliers. This is shown by Cook's distance. If a data point is outside the dashed line of Cook's distance, then it is an outlier.
+
+Below are the plots for our first model based on the number of cases:
+```{r Sensitivity Analysis: Cases, echo=FALSE}
+
+plot(cases.model)
+```
+
+Starting with the Residuals vs. Fitted plot, we can see that our data follows a roughly linear pattern. It does however slope slightly downwards, thus indicating that it is not entirely linear and that our model doesn't have a perfect fit.
+
+Next, by looking at the Normal Q-Q plot, we can see that the residuals deviate from the Normal line. This indicates that our sample may be skewed, and that there may be some underlying issues with the data or our model.
+
+Moving on to the Scale-Location plot, we can see that our residuals are clustering and are not evenly spread. This indicates that our data does not have an equal variance, and that there is some skew to our data.
+
+Finally, by taking a look at our Residuals vs. Leverage plot, we can see that there are no data points outside Cook's distance. This indicates that there are no outliers in our data set, which is consistent with our clustering of data from earlier.
+
+Now let's take a look at the following plots for our other model based on the number of Covid-19 related deaths:
+
+```{r Sensitivity Analysis: Deaths, echo=FALSE}
+
+plot(deaths.model)
+```
+
+Looking at the Residuals vs. Fitted plot, we can see that our data follows a more linear pattern than our last model. This shows us that our model is a better fit than the last one, and may indicate that our chosen indicator variables were more accurate.
+
+Next, by looking at the Normal Q-Q plot, we can see that the residuals don't deviate from the Normal line until you look at the edges of the graph. This tells us that our sample may be slightly skewed, but is much cleaner than the last model. All in all, the residuals follow the normal line, showing that the data is less skewed and more accurate.
+
+By observing our Scale-Location plot, we can see that our residuals are clustering just like the last model, and that they are also not evenly spread. This gives us insight into the lack of equal variance in our model, and that there is some skew to our data, just like the last model.
+
+Finally, by taking a look at our Residuals vs. Leverage plot, we can see that there are no data points outside Cook's distance in this model either. This indicates that there are no outliers in our data set, which is consistent with our other model as well.
+
 
 ## Discussion
 

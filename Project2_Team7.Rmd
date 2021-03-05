@@ -218,7 +218,6 @@ The Residual vs. Fitted plot shows if the residuals have a non-linear pattern or
 
 Below are the plots for our first model based on the number of cases:
 ```{r Sensitivity Analysis: Cases, echo=FALSE}
-
 plot(cases.model)
 ```
 
@@ -248,7 +247,12 @@ Finally, by taking a look at our Residuals vs. Leverage plot, we can see that th
 
 ## Discussion
 
-Conclude your analysis with a discussion of your findings and caveats of your approach.
+In this data analysis report, two multiple linear regression models were constructed. The first model examined the relationship between the number of trips (1-3, 50-100, 250-500) and the number of new cases of COVID-19. Based on the results from ANOVA, there is statistical evidence to suggest that there is a significant effect in the number of new cases regardless of the number of trips. The second model considers the correlation between the number of trips and the number of new COVID-19 deaths. Interestingly, the ANOVA analysis found that for 50-100 trips, there was no significant correlation in the number of deaths in the last year while 1-3 and 250-500 trips did have a significant effect on COVID-19 deaths. 
+
+Both models have low adjusted R-squared values, which suggest that the models are not a perfect fit. According to sensitivity analysis, data for the new COVID-19 deaths model resembles more closely a linear pattern compared to data from the first model that showed the number of new cases. The residuals from the first model deviated while they did not for the second model. Based on this, the second model that showed the number of new deaths was a better fit for the data. Nonetheless, for both models, there was a lack of equal variance based on uneven spread of residuals. There also does not appear to be significant outliers in the data set. 
+
+Caveats of this research include that at the start of the pandemic, the counting of confirmed cases and deaths was inconsistent. This was likely attributed to not having immediately discovered COVID-19 and thus, delay of political action. Also a lack of resources to confirm COVID-19 cases contributed to this. However, any outliers that might have been present at the beginning are not likely to be present anymore as data collection became more consistent. In addition, further research should be done to provide insight on the variation in distribution and the behavior of the residuals as observed in our sensitivity analysis.
+
 
 ## Appendix
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}

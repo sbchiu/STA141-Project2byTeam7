@@ -1,0 +1,210 @@
+---
+title: "Project 2 Description"
+author: "Team 7"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+***
+
+
+## Abstract
+
+In this project, the variation of trips, cases, and deaths; the distribution of the case mortality rate; and the relationship of different trip distances were investigated. One of the two datasets utilized in this analysis comes from the World Health Organization (WHO), an organization who is consistently compiling COVID-19 global data to show statistics and encourage data exploration. The other dataset originates from the Bureau of Transportation Statistics, who is also consistently measuring the population staying at home and the trips by distance for the population not staying home during the COVID-19 pandemic and stay-at-home order. The analysis was carried out with the utilization of statistical tools, such as measures of location and graphs to show relationships and trends. For the descriptive analysis, the median case mortality rate of a particular year-long range was observed and the linear relationship of cases and deaths were observed. With a multiple linear regression and ANOVA model for our inferential analysis, we were able to show that the effect of a random selection of distances on COVID-19 cases and deaths. For a sensitivity analysis, diagnostic plots were used to assess and confirm our results.
+
+## Introduction
+
+The dataset from the World Health Organization (WHO) consists of daily reported counts of cases and deaths due to COVID-19. We also referenced the Trips by Distance dataset from the Bureau of Transportation Statistics for information on the number of trips taken by distance of the nation during the pandemic. In this data analysis, we are primarily interested in the following questions: what is the relationship of trips with COVID-19 cases and deaths, are there variations between different distances for trips taken outside of the home and with COVID-19 cases and deaths, and how correlated are cases and deaths with different distances. The data analysis will distinguish if trip distances affect COVID-19 cases. This will also indicate if smaller and/or larger distances of travel contributes to a rise of cases and deaths, primarily due to community transmission.
+
+# Background
+
+This data analysis utilizes the two following datasets: the WHO COVID-19 Dashboard and the Trips by Distance dataset.
+
+The WHO has consistently collected data from around the world during the COVID-19 pandemic. The WHO dataset reports daily confirmed counts by countries, territories, and areas. Counts starting from December 31, 2019 to March 21, 2020 were taken from International Health Regulations (IHR) and thereafter, the confirmed counts are continuously compiled from global data on WHO dashboards of the headquarters and different regions. Daily counts may vary between countries, territories, and areas due to different sources, cut-off times, case detections, etc. There may also be instances of negative numbers because of the removal of cases or deaths, which are attributed to changes in data reconciliation procedures.
+
+The WHO COVID-19 dataset used in the analysis contains daily updated counts of cases and deaths with the following variables: the reporting date, country code, country, WHO region, new cases count, cumulative cases to date, new deaths count, and cumulative deaths to date.
+
+The Trips by Distance dataset compiles statistics of transportation, including the distance people travel when they are not quarantining during the COVID-19 pandemic and stay-at-home order. The Bureau of Transportation Statistics has reported data to date of mobility statistics. The data is gathered and merged from a mobile device data panel that takes distances traveled by people. The Bureau considers temporal frequency and spatial accuracy for locations as well as temporal coverage and representativeness for devices. All personal mobile data and locations have been excluded from sources for confidentiality. These trips include all types of transportation, including but not limited to airlines, transit, trains, and cars.
+
+The dataset contains daily updated statistics with variables, such as the national count of the population staying at home, the population not staying at home, and the count of trips of various distances from less than one mile to over 500 miles, which are the primary variables of this data analysis.
+
+
+```{r include = F, echo = FALSE}
+library(dplyr)
+library(tibble)
+library(tidyverse)
+library(ggplot2)
+library(car)
+library(stringr)
+library(readr)
+library(plotly)
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+To observe the relationship of COVID-19 cases and deaths with trips by distance, we merged the two datasets by date. Below is what we will be using to investigate our questions of interest. We will primarily focus on one year of data, starting from February 1,2020 to January 31, 2021, for our analysis.
+
+```{r, message = FALSE, results = FALSE, warning = FALSE}
+tripsbydistance <- read_csv("Trips_by_Distance.csv") 
+names(tripsbydistance)<-str_replace_all(names(tripsbydistance), c(" " = "_"))
+
+WHO_COVID_19_global_data <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+us_covid_data <- filter(WHO_COVID_19_global_data, Country %in% "United States of America")
+
+mergedata = merge(tripsbydistance ,us_covid_data, by.x = "Date", by.y = "Date_reported")
+newdata <- mergedata[-c(2:9, 20:21)] 
+newdata_subset = newdata[-c(1:29, 396:415),]
+```
+
+To visualize the COVID-19 data set, below is an interactive plot to show the changes in new cases and deaths across time, starting from when cases and deaths started to be reported. The slow start of confirmed cases is attributed to the delay of discovery of the coronavirus, delay of political action, and lack of resources in order to confirm cases of COVID-19. 
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+newdata %>% 
+  filter(Date>= "2020-03-01", Date<= "2021-02-20") %>% 
+  group_by(Date,WHO_region) %>%   summarize(Deaths = sum(New_deaths),
+            Cases = sum(New_cases)) %>% 
+  mutate(Date = Date- as.Date("2020-03-01")) %>%
+  plot_ly(
+    x= ~Cases,
+    y= ~Deaths,
+    frame = ~Date,
+    type = 'scatter',
+    mode = 'markers',
+    showlegend = T
+  )
+```
+
+Another plot is included below to show the changes in new cases over time. This can reflect trends of the population with seasons as well as policy changes. It is observed that there was a substantial increase during the summer months. This shows there was an increase in community transmission due to the population leaving their homes more often as well as the changes in policies to improve the economic environment with relaxing certain restrictions for businesses of the stay-at-home order. It is also observed that there was a very large increase during the holiday season, ranging from November to January. Families are more likely to have larger group sizes and more likely to travel to visit family and friends.
+
+```{r, echo = FALSE}
+fig2 <- plot_ly(newdata_subset, x = ~Date, y = ~New_cases, name = 'New cases', type = 'scatter', mode = 'lines') %>%   layout(title = "New Cases vs Date",
+         xaxis = list(title = "Date"),
+         yaxis = list (title = "New Cases"))
+fig2
+```
+
+
+The plot below is of new deaths versus new cases. Here, we can observe that although when new cases start to rise, the number of new deaths also starts to rise. The points seem to follow a linear, positive relationship.
+
+```{r, echo = FALSE}
+fig3 <- newdata_subset %>% 
+  filter(Date>= "2020-03-01", Date<= "2021-02-20") %>% 
+  ggplot(aes(x=New_cases,y=New_deaths)) +
+  geom_point()+
+  geom_text(aes(label = " "), hjust=0, vjust=0) +
+  ggtitle("New Deaths vs New Cases") + 
+  geom_smooth(method='lm', formula= y~x) + 
+  xlab("New Cases") + ylab("New Deaths")
+fig3
+```
+
+Next, we compare the trends of the number trips outside of the home per day, the number of cases, and the number of deaths. In the graph below, we can observe the delay between people taking trips, people showing symptoms and confirming they have COVID-19, and people dying as a percentage of those cases. Because we see this delay, we are able to demonstrate COVID-19's 14-day incubation period. For example, around mid to late May, there was an increase in the number of trips, which caused an increase in confirmed cases starting early to mid June. This then leads to a general increase in deaths in late July to early August. In order to visualize the trends efficiently, the variables were scaled by factors of 10.
+
+```{r, echo = FALSE}
+fig4 <- plot_ly(newdata, x = ~Date, y = ~New_cases/10, name = 'New cases', type = 'scatter', mode = 'lines', line = list(color = 'rgb(22, 96, 167)') ) %>%   layout(title = "Counts vs Date",
+         xaxis = list(title = "Date"),
+         yaxis = list (title = "Count"))
+fig4 <- fig4 %>% add_trace(y = ~New_deaths*10, name = 'New Deaths', mode = 'lines', line = list(color = 'rgb(205, 12, 24)'))
+fig4 <- fig4 %>% add_trace(y = ~((mergedata$Number_of_Trips)*(1/10000)), name = 'Number of Trips', mode = 'lines', line = list(color = I('green')))
+fig4
+```
+
+```{r, echo=FALSE}
+casemortalityrate = (newdata_subset$New_deaths / newdata_subset$New_cases)*100
+casemortalityrate[is.infinite(casemortalityrate)] <- NA 
+```
+
+Next, below is a graph that displays the Case Mortality Rate over time. This was calculated by dividing the daily new deaths by the new cases. By the graph, we can immediately observe that the graph has similarities to the graph behavior of both the cases and deaths. On one hand, we primarily see the first half of the case mortality rate graph to mirror the first half of the deaths, which most likely contains outliers due to the inconsistent works of counting cases in the beginning of the pandemic. On the other hand, we observe the second half of the case mortality rate graph to mirror the second half of the cases, which most likely does not contain outliers due to the improved environment of the nation's ability to detect cases and deaths of COVID-19.
+
+```{r, echo=FALSE}
+fig5 <- plot_ly(newdata_subset, x = ~Date, y = ~casemortalityrate, name = 'trace 0', type = 'scatter', mode = 'lines') %>%   layout(title = "Case Mortality Rate",
+         xaxis = list(title = "Date"),
+         yaxis = list (title = "Case Mortality Rate"))
+fig5
+```
+
+By using the `summary` function, we can observe the distribution of case mortality rates throughout the year.
+
+```{r, echo=FALSE}
+summary(casemortalityrate)
+```
+
+Because the daily death count is more closely related to earlier confirmed cases, the counts of deaths are not necessarily the deaths from the count of confirmed cases of that day. Because of this nature of the dataset, we observe the median case mortality rate. This is to minimize the influence of outliers in the dataset, such as caused by days with an unusually high number of deaths and low number of confirmed cases. The median case mortality rate shows that we expect 1.564% of cases to end in death.
+
+
+## Inferential Analysis
+
+```{r, echo=FALSE}
+newdata_subset = newdata[-c(1:29, 396:415),]
+```
+
+$Y_{ij} = \mu_i + \epsilon{ij}$ 
+
+$\mu_i$ represents the mean percentage of number trips outside of the home per day.
+
+$i$ = NEED TO FINISH
+
+$j$ = NEED TO FINISH
+
+We are interested in whether or not there is statistical evidence the means among the different trip sizes is equal. If we fail to reject the null hypothesis we will conclude that the amount of trips out of the home during the year did not have a significant impact on the confirmed new cases of Covid-19 or the confirmed deaths resulting from Covid-19.
+
+$H_0 : \mu_1 = \mu_2 = \mu_3$ $H_A :$ At least one $\mu_i$ is not equal 
+
+
+The three independent variables that we will use from this data set are `Number_of_Trips_1-3`, `Number_of_Trips_50-100`, `Number_of_Trips_200-500`. The two dependent variables we will use from this data set are `New_cases`, and `New_deaths`. The first three variables report the amount of trips individuals took during February 1, 2020 to January 31, 2021 throughout the United States among the Covid-19 pandemic. The trip numbers are grouped by three different intervals; 1-3 trips, 50-100 trips, and 250-500 trips. The `New_cases` and `New_deaths` variables are the amount of new confirmed cases and confirmed deaths during the same time frame. Each independent variable is plotted below to display the distribution compared to the dependent variables
+
+
+The three main assumptions for the one-way ANOVA model are the following:
+
+* The $Y_{ij}$'s were randomly sampled
+
+* The $i$ groups are independent
+
+* $\epsilon_{ij}$ ~ (0,$\sigma^{2}_{\epsilon}$) where the errors are independent and normally distributed
+
+# NEED TO DO 4.c.
+
+
+
+Model No. 1:
+```{r echo=F}
+cases.model = aov(New_cases ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3` + `Number_of_Trips_50-100`, data=newdata_subset)
+anova(cases.model)
+```
+
+The F test-statistic for all three variables is larger than zero, meaning there is statistical evidence to suggest the group means are not equal for each quantity of trips taken. 
+
+Since the p-value for each of the variables is less than our significance level of 0.05, we will reject the null hypothesis and conclude that there is statistical evidence to suggest that the true average quantity of trips taken is not equal. 
+
+
+Model No. 2:
+```{r echo=F}
+deaths.model = aov(New_deaths ~ `Number_of_Trips_250-500` + `Number_of_Trips_1-3` + `Number_of_Trips_50-100`, data=newdata_subset)
+anova(deaths.model)
+```
+
+For the trip sizes of 1-3 and 250-500, the F test-statistics are greater than zero, meaning there is statistical evidence to suggest the group means are not equal for each quantity of trips taken. The F test-statistic for the trip size of 50-100 is very close to 0 meaning there is small evidence that the group mean is different among the other two quantities. 
+
+The p-value for the trip size of 50-100 is larger than our p-value, therefore we fail to reject the null and conclude that the true average quantity of trips taken is equal. This suggests that taking 50 to 100 trips from the home did not correlate with the amount of deaths from Covid-19 in the last year. 
+
+Along with the significant evidence from the F test-statistic that the trip size of 1-3 and 250-500 does have significant evidence to say the means are different is confirmed by both of the p-values being less than that of our significance level of 0.95. This suggests that taking either 1 to 3 trips or 250 to 500 trips from the home in the last year did have a large effect on the total count of confirmed deaths. 
+
+
+## Sensitivity Analysis
+
+Conduct model diagnostics
+
+## Discussion
+
+Conclude your analysis with a discussion of your findings and caveats of your approach.
+
+## References
+
+WHO coronavirus disease (COVID-19) dashboard. Geneva: World Health Organization, 2020. Available online: https://covid19.who.int/ 
+
+Trips by Distance. U.S. Department of Transportation Bureau of Transportation Statistics. Available online:
+https://data.bts.gov/Research-and-Statistics/Trips-by-Distance/w96p-f2qv
+
+
+
+
+

@@ -83,7 +83,7 @@ fig2
 ```
 
 
-The plot below is of new deaths versus new cases. Here, we can observe that although when new cases start to rise, the number of new deaths also starts to rise. The points seem to follow a linear, positive relationship.
+The plot below is of new deaths versus new cases. Here, we can observe that although when new cases start to rise, the number of new deaths also starts to rise. The new cases and new deaths have a linear, positive relationship.
 
 ```{r, echo = FALSE}
 fig3 <- newdata_subset %>% 

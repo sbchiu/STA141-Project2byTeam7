@@ -254,12 +254,18 @@ Conclude your analysis with a discussion of your findings and caveats of your ap
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 ```
 
+## Acknowledgements
+
+Dr. Shizhe Chen Jupiter Notebook - Chapter4ANOVA
+
 ## References
 
 WHO coronavirus disease (COVID-19) dashboard. Geneva: World Health Organization, 2020. Available online: https://covid19.who.int/ 
 
 Trips by Distance. U.S. Department of Transportation Bureau of Transportation Statistics. Available online:
 https://data.bts.gov/Research-and-Statistics/Trips-by-Distance/w96p-f2qv
+
+Plotly. Plotly R Open Source Graphing Library. Available online: https://plotly.com/r/
 
 ## Session Info
 ```{r}

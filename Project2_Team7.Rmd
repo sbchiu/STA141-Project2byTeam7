@@ -1,7 +1,7 @@
 ---
-title: "Project 2 Description"
+title: "Project 2: Analysis of Trips by Distance and COVID-19"
 author: "Team 7"
-date: "`r Sys.Date()`"
+date: "3/3/2021"
 output: html_document
 ---
 
@@ -196,6 +196,10 @@ Conduct model diagnostics
 ## Discussion
 
 Conclude your analysis with a discussion of your findings and caveats of your approach.
+
+## Appendix
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
 
 ## References
 

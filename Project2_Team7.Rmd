@@ -41,9 +41,9 @@ library(plotly)
 knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
-To observe the relationship of COVID-19 cases and deaths with trips by distance, we merged the two datasets by date. Below is what we will be using to investigate our questions of interest. We will primarily focus on one year of data, starting from February 1,2020 to January 31, 2021, for our analysis.
+To observe the relationship of COVID-19 cases and deaths with trips by distance, we merged the two datasets by date. The following is what we will be using to investigate our questions of interest. We will primarily focus on one year of data, starting from February 1,2020 to January 31, 2021, for our analysis.
 
-```{r, message = FALSE, results = FALSE, warning = FALSE}
+```{r, echo=FALSE, message = FALSE, results = FALSE, warning = FALSE}
 tripsbydistance <- read_csv("Trips_by_Distance.csv") 
 names(tripsbydistance)<-str_replace_all(names(tripsbydistance), c(" " = "_"))
 
@@ -261,7 +261,10 @@ WHO coronavirus disease (COVID-19) dashboard. Geneva: World Health Organization,
 Trips by Distance. U.S. Department of Transportation Bureau of Transportation Statistics. Available online:
 https://data.bts.gov/Research-and-Statistics/Trips-by-Distance/w96p-f2qv
 
-
+## Session Info
+```{r}
+sessionInfo()
+```
 
 
 
